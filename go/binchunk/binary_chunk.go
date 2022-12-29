@@ -1,5 +1,9 @@
 package binchunk
 
+import (
+	"encoding/binary"
+)
+
 type binChunk struct {
 	header
 	sizeUpvalues byte
@@ -46,4 +50,24 @@ type LocVar struct {
 	VarName string
 	StartPC uint32
 	EndPC   uint32
+}
+
+type reader struct {
+	data []byte
+}
+
+func (r *reader) readByte() byte {
+	if len(r.data) < 1 {
+		return 0
+	}
+
+	b := r.data[0]
+	r.data = r.data[1:]
+	return b
+}
+
+func (r *reader) readUint32() uint32 {
+	ret := binary.LittleEndian.Uint32(r.data)
+	r.data = r.data[4:]
+	return ret
 }
