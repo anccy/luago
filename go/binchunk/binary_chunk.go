@@ -10,6 +10,7 @@ type binChunk struct {
 	mainFunc     *Prototype
 }
 
+// lua: DumpHeader
 type header struct {
 	signature       [4]byte
 	version         byte
@@ -24,6 +25,7 @@ type header struct {
 	luacNum         float64
 }
 
+// lua: DumpFunction
 // Peototype 函数原型 其中Source, LineInfo, Locvars, UpvalueNames 都是调试信息，非必需
 type Prototype struct {
 	Source          string        // 二进制chunk的来源，文件/标准输入/字符串编译等
@@ -49,7 +51,7 @@ type Upvalue struct {
 type LocVar struct {
 	VarName string
 	StartPC uint32
-	EndPC   uint32
+	EndPC   uint3/Users/yyymagic/lua/lua-5.3.6/src2
 }
 
 type reader struct {
@@ -71,3 +73,6 @@ func (r *reader) readUint32() uint32 {
 	r.data = r.data[4:]
 	return ret
 }
+
+// ANCCY TODO
+// A Luac parser
