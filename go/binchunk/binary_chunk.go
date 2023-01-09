@@ -2,6 +2,9 @@ package binchunk
 
 import (
 	"encoding/binary"
+	"fmt"
+	"log"
+	"os"
 )
 
 type binChunk struct {
@@ -51,7 +54,7 @@ type Upvalue struct {
 type LocVar struct {
 	VarName string
 	StartPC uint32
-	EndPC   uint3/Users/yyymagic/lua/lua-5.3.6/src2
+	EndPC   uint32
 }
 
 type reader struct {
@@ -59,10 +62,6 @@ type reader struct {
 }
 
 func (r *reader) readByte() byte {
-	if len(r.data) < 1 {
-		return 0
-	}
-
 	b := r.data[0]
 	r.data = r.data[1:]
 	return b
@@ -73,6 +72,41 @@ func (r *reader) readUint32() uint32 {
 	r.data = r.data[4:]
 	return ret
 }
+
+func (r *reader) readUint64() uint64 {
+	ret := binary.LittleEndian.Uint64(r.data)
+	r.data = r.data[8:]
+	return ret
+}
+
+func (r *reader) readBytes(n int) []byte {
+	ret := r.data[:n]
+	r.data = r.data[n:]
+	return ret
+}
+
+func ParseChunk(s string) {
+	rd := &reader{
+		data: []byte(s),
+	}
+	for {
+		b := rd.readByte()
+		fmt.Printf("%c", b)
+	}
+}
+
+func ParseChunkFile(path string) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ParseChunk(string(b))
+}
+
+func Cmd() {
+	ParseChunkFile("./lua/luac.out")
+}
+
 
 // ANCCY TODO
 // A Luac parser
