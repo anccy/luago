@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"math"
 	"os"
 )
 
@@ -79,7 +80,26 @@ func (r *reader) readUint64() uint64 {
 	return ret
 }
 
-func (r *reader) readBytes(n int) []byte {
+func (r *reader) readLuaInteger() int64 {
+	return int64(r.readUint64())
+}
+
+func (r *reader) readLuaNumber() float64 {
+	return math.Float64frombits(r.readUint64())
+}
+
+func (r *reader) readString() string {
+	size := uint(r.readByte())
+	if size == 0 {
+		return ""
+	} else if size == 0xff { // long string
+		size = uint(r.readUint64())
+	}
+	bytes := r.readBytes(size - 1)
+	return string(bytes)
+}
+
+func (r *reader) readBytes(n uint) []byte {
 	ret := r.data[:n]
 	r.data = r.data[n:]
 	return ret
@@ -106,7 +126,6 @@ func ParseChunkFile(path string) {
 func Cmd() {
 	ParseChunkFile("./lua/luac.out")
 }
-
 
 // ANCCY TODO
 // A Luac parser
