@@ -11,11 +11,15 @@ const (
 	LUA_COPYRIGHT = LUA_RELEASE + "  Copyright (C) 1994-2020 Lua.org, PUC-Rio"
 	LUA_AUTHORS   = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes"
 
-	LUA_SIGNATURE = "\x1blua"
+	LUA_SIGNATURE = "\x1bLua"
 )
 
-// data to catch conversion errors
 const (
-	LUAC_DATA = "\x19\x93\r\n\x1a\n"
-	LUAC_INT  = 0x5678
+	LUAC_VERSION = 0x53
+	LUAC_FORMAT  = 0
+	LUAC_DATA    = "\x19\x93\r\n\x1a\n"
+	LUAC_INT     = 0x5678
+	LUAC_NUM     = 370.5
+	CINT_SIZE    = 4
+	CSIZET_SIZE  = 8
 )

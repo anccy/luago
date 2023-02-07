@@ -2,6 +2,7 @@ package binchunk
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -105,14 +106,38 @@ func (r *reader) readBytes(n uint) []byte {
 	return ret
 }
 
+func (r *reader) checkHeader() error {
+	if string(r.readBytes(4)) != LUA_SIGNATURE {
+		return errors.New("signature")
+	}
+	if r.readByte() != LUAC_VERSION {
+		return errors.New("version")
+	}
+	if r.readByte() != LUAC_FORMAT {
+		return errors.New("format")
+	}
+	if string(r.readBytes(6)) != LUAC_DATA {
+		return errors.New("corrupted")
+	}
+	if r.readByte() != CINT_SIZE {
+		return errors.New("int size")
+	}
+	if r.readByte() != CSIZET_SIZE {
+		return errors.New("sizet")
+	}
+	// todo
+	return nil
+}
+
 func ParseChunk(s string) {
 	rd := &reader{
 		data: []byte(s),
 	}
-	for {
-		b := rd.readByte()
-		fmt.Printf("%c", b)
-	}
+	fmt.Println(rd.checkHeader())
+	//for {
+	//	b := rd.readByte()
+	//	fmt.Printf("%c", b)
+	//}
 }
 
 func ParseChunkFile(path string) {
