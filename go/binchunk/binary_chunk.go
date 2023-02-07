@@ -123,9 +123,23 @@ func (r *reader) checkHeader() error {
 		return errors.New("int size")
 	}
 	if r.readByte() != CSIZET_SIZE {
-		return errors.New("sizet")
+		return errors.New("sizet size")
 	}
-	// todo
+	if r.readByte() != INSTRUCTION_SIZE {
+		return errors.New("instruction size")
+	}
+	if r.readByte() != LUA_INTEGER_SIZE {
+		return errors.New("lua integer size")
+	}
+	if r.readByte() != LUA_NUMBER_SIZE {
+		return errors.New("lua number size")
+	}
+	if r.readLuaInteger() != LUAC_INT {
+		return errors.New("luac int")
+	}
+	if r.readLuaNumber() != LUAC_NUM {
+		return errors.New("luac num")
+	}
 	return nil
 }
 
