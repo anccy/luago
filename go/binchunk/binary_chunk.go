@@ -44,7 +44,7 @@ type Prototype struct {
 	Upvalues        []Upvalue
 	Protos          []*Prototype // 子函数原型列表
 	LineInfo        []uint32     // 行号表，和指令表一一对应
-	Locvars         []LocVar     // 局部变量，变量名+起止指令索引
+	LocVars         []LocVar     // 局部变量，变量名+起止指令索引
 	UpvalueNames    []string     // Upvalue名列表，和Upvalues一一对应
 }
 
@@ -106,6 +106,86 @@ func (r *reader) readBytes(n uint) []byte {
 	return ret
 }
 
+func (r *reader) readCode() []uint32 {
+	code := make([]uint32, r.readUint32())
+	for i := range code {
+		code[i] = r.readUint32()
+	}
+	return code
+}
+
+func (r *reader) readConstant() interface{} {
+	switch r.readByte() {
+	case TAG_NIL:
+		return nil
+	case TAG_BOOLEAN:
+		return r.readByte() != 0
+	case TAG_INTEGER:
+		return r.readLuaInteger()
+	case TAG_NUMBER:
+		return r.readLuaNumber()
+	case TAG_SHORT_STR, TAG_LONG_STR:
+		return r.readString()
+	default:
+		panic("corrupted!")
+	}
+}
+
+func (r *reader) readUpvalues() []Upvalue {
+	upvalues := make([]Upvalue, r.readUint32())
+	for i := range upvalues {
+		upvalues[i] = Upvalue{
+			Instack: r.readByte(),
+			Idx:     r.readByte(),
+		}
+	}
+	return upvalues
+}
+
+func (r *reader) readProtos(parentSource string) []*Prototype {
+	protos := make([]*Prototype, r.readUint32())
+	for i := range protos {
+		protos[i] = r.readProto(parentSource)
+	}
+	return protos
+}
+
+func (self *reader) readLineInfo() []uint32 {
+	lineInfo := make([]uint32, self.readUint32())
+	for i := range lineInfo {
+		lineInfo[i] = self.readUint32()
+	}
+	return lineInfo
+}
+
+func (self *reader) readLocVars() []LocVar {
+	locVars := make([]LocVar, self.readUint32())
+	for i := range locVars {
+		locVars[i] = LocVar{
+			VarName: self.readString(),
+			StartPC: self.readUint32(),
+			EndPC:   self.readUint32(),
+		}
+	}
+	return locVars
+}
+
+func (self *reader) readUpvalueNames() []string {
+	names := make([]string, self.readUint32())
+	for i := range names {
+		names[i] = self.readString()
+	}
+	return names
+}
+
+func (r *reader) readConstants() []interface{} {
+	constants := make([]interface{}, r.readUint32())
+	for i := range constants {
+		constants[i] = r.readConstant()
+	}
+	return constants
+}
+
 func (r *reader) checkHeader() error {
 	if string(r.readBytes(4)) != LUA_SIGNATURE {
 		return errors.New("signature")
@@ -141,6 +221,28 @@ func (r *reader) checkHeader() error {
 		return errors.New("luac num")
 	}
 	return nil
+}
+
+func (self *reader) readProto(parentSource string) *Prototype {
+	source := self.readString()
+	if source == "" {
+		source = parentSource
+	}
+	return &Prototype{
+		Source:          source,
+		LineDefined:     self.readUint32(),
+		LastLineDefined: self.readUint32(),
+		NumParams:       self.readByte(),
+		IsVararg:        self.readByte(),
+		MaxStackSize:    self.readByte(),
+		Code:            self.readCode(),
+		Constants:       self.readConstants(),
+		Upvalues:        self.readUpvalues(),
+		Protos:          self.readProtos(source),
+		LineInfo:        self.readLineInfo(),
+		LocVars:         self.readLocVars(),
+		UpvalueNames:    self.readUpvalueNames(),
+	}
 }
 
 func ParseChunk(s string) {
