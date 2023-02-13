@@ -1,7 +1,10 @@
 package main
 
-import "github.com/anccy/luago/go/binchunk"
+import (
+	"github.com/anccy/luago/go/binchunk"
+)
 
 func main() {
-	binchunk.Cmd()
+	proto := binchunk.ParseChunkFile("./lua/luac.out")
+	binchunk.List(proto)
 }

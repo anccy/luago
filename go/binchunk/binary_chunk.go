@@ -3,7 +3,6 @@ package binchunk
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"log"
 	"math"
 	"os"
@@ -245,23 +244,24 @@ func (self *reader) readProto(parentSource string) *Prototype {
 	}
 }
 
-func ParseChunk(s string) {
+func ParseChunk(s string) *Prototype {
 	rd := &reader{
 		data: []byte(s),
 	}
-	fmt.Println(rd.checkHeader())
-	//for {
-	//	b := rd.readByte()
-	//	fmt.Printf("%c", b)
-	//}
+	err := rd.checkHeader()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rd.readByte()
+	return rd.readProto("")
 }
 
-func ParseChunkFile(path string) {
+func ParseChunkFile(path string) *Prototype {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ParseChunk(string(b))
+	return ParseChunk(string(b))
 }
 
 func Cmd() {
