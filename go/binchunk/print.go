@@ -1,6 +1,9 @@
 package binchunk
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/anccy/luago/go/vm"
+)
 
 func printHeader(f *Prototype) {
 	funcType := "main"
@@ -23,7 +26,8 @@ func printCode(f *Prototype) {
 		if len(f.LineInfo) > 0 {
 			line = fmt.Sprintf("%d", f.LineInfo[pc])
 		}
-		fmt.Printf("\t%d\t[%s]\t0x%08X\n", pc+1, line, c)
+		i := vm.Instruction(c)
+		fmt.Printf("\t%d\t[%s]\t %v \n", pc+1, line, i.String())
 	}
 }
 

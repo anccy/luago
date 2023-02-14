@@ -1,5 +1,10 @@
 package vm
 
+import (
+	"fmt"
+	"strings"
+)
+
 const MAXARG_Bx = 1<<18 - 1
 const MAXARG_sBx = MAXARG_Bx >> 1
 
@@ -12,8 +17,8 @@ func (self Instruction) Opcode() int {
 
 func (self Instruction) ABC() (a, b, c int) {
 	a = int(self >> 6 & 0xff)
-	b = int(self >> (6 + 8) & 0x1f)
-	c = int(self >> (6 + 8 + 9) & 0x1f)
+	c = int(self >> (6 + 8) & 0x1ff)
+	b = int(self >> (6 + 8 + 9) & 0x1ff)
 	return
 }
 
@@ -46,4 +51,43 @@ func (self Instruction) BMode() byte {
 
 func (self Instruction) CMode() byte {
 	return opcodes[self.Opcode()].argCMode
+}
+
+func (self *Instruction) String() string {
+	ret := &strings.Builder{}
+	_, _ = fmt.Fprintf(ret, "%s\t", self.OpName())
+	switch self.OpMode() {
+	case IABC:
+		a, b, c := self.ABC()
+		_, _ = fmt.Fprintf(ret, "%d", a)
+		if self.BMode() != OpArgN {
+			if b > 0xff {
+				_, _ = fmt.Fprintf(ret, " %d", -1-b&0xff)
+			} else {
+				_, _ = fmt.Fprintf(ret, " %d", b)
+			}
+		}
+		if self.CMode() != OpArgN {
+			if c > 0xff {
+				_, _ = fmt.Fprintf(ret, " %d", -1-c&0xff)
+			} else {
+				_, _ = fmt.Fprintf(ret, " %d", c)
+			}
+		}
+	case IABx:
+		a, bx := self.ABx()
+		_, _ = fmt.Fprintf(ret, "%d", a)
+		if self.BMode() == OpArgK {
+			_, _ = fmt.Fprintf(ret, " %d", -1-bx)
+		} else if self.BMode() == OpArgU {
+			_, _ = fmt.Fprintf(ret, " %d", bx)
+		}
+	case IAsBx:
+		a, sbx := self.AsBx()
+		_, _ = fmt.Fprintf(ret, "%d %d", a, sbx)
+	case IAx:
+		ax := self.Ax()
+		_, _ = fmt.Fprintf(ret, "%d", -1-ax)
+	}
+	return ret.String()
 }
