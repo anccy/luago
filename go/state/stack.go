@@ -55,7 +55,7 @@ func (ls *luaStack) get(idx int) luaValue {
 	if i <= 0 || i > ls.top {
 		return nil
 	}
-	return ls.slots[idx-1]
+	return ls.slots[i-1]
 }
 
 func (ls *luaStack) set(idx int, val luaValue) {

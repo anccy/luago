@@ -2,7 +2,7 @@ package api
 
 type LuaType = int
 
-type LuaState interface {
+type LuaStateI interface {
 	/* basic stack manipulation */
 	GetTop() int
 	AbsIndex(idx int) int
