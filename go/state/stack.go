@@ -65,3 +65,12 @@ func (ls *luaStack) set(idx int, val luaValue) {
 	}
 	ls.slots[i-1] = val
 }
+
+func (ls *luaStack) reverse(i, j int) {
+	slots := ls.slots
+	for i < j {
+		slots[i], slots[j] = slots[j], slots[i]
+		i++
+		j--
+	}
+}
