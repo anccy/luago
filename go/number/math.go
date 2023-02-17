@@ -21,3 +21,24 @@ func IMod(a, b int64) int64 {
 func FMod(a, b float64) float64 {
 	return a - math.Floor(a/b)*b
 }
+
+func ShiftLeft(a, n int64) int64 {
+	if n >= 0 {
+		return a << uint64(n)
+	} else {
+		return ShiftRight(a, -n)
+	}
+}
+
+func ShiftRight(a, n int64) int64 {
+	if n >= 0 {
+		return int64(uint64(a) >> uint64(n))
+	} else {
+		return ShiftLeft(a, -n)
+	}
+}
+
+func FloatToInteger(f float64) (int64, bool) {
+	i := int64(f)
+	return i, float64(i) == f
+}
